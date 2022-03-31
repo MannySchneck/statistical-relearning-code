@@ -108,9 +108,7 @@ mean(w == 6)
 # declarative coding using tidyverse stuff
 # (https://sr2-solutions.wjakethompson.com/bayesian-inference.html). I didn't
 # want to blindly copy-paste that, or go that deep into R yet. Another solution
-# did guess and check with a
-# function.
-
+# did guess and check with a function.
 # This is my linear-search solution. It agrees with the fancy R one:
 
 assumed_water_percentage <- .7
@@ -172,4 +170,47 @@ HPDI(prob= .97, samples)
 # 0.4794795 0.6296296
 
 # 3H3
-rbinom(1e4, 200, prob=samples)
+simulated <- rbinom(1e4, 200, prob=samples)
+
+simplhist(simulated, xlab="binomial trials, randomly performed, with probabilities as weighted samples from the posterior distribution")
+# Yup, looks good
+
+# 3H4
+# Do the same binomial trial, but only one birth, since we're looking at first
+# borns.
+simulated <- rbinom(1e4, 200, prob=samples)
+dens(simulated)
+
+# Looks like the model is skewed male. Mean birth value is .554 on the model,
+# vs .51 in birth1. Birth2 is at .6, inidicating that the second birth skews
+# male.
+# 3H5
+# Second births that followed female first borns
+# Recall, male = 1, female = 0, so we can identify sequence female -> male by
+# counting 1s in the subtraction.
+sequence <- birth2 - birth1
+female_after_male <- sum(sequence == 1)
+
+# We want to check the independence of the first/second births.
+
+# Ok damn. I wasn't reading literally.
+# Get the number of firstborn girls
+female_first_borns <- sum(birth1 == 0)
+
+# Still using our sampled posterior for the random binomial trial.
+
+# So what this says: From the count of female first borns, simulate male birth
+# binomial trials. I.e. consider each second birth an event in a binomial trial
+# of size female_first_borns.
+male_second_birth_simulations <- rbinom(1e4, female_first_borns, prob=samples)
+#
+median(male_second_birth_simulations)
+# 27
+chainmode(male_second_birth_simulations)
+# [1] 27.1417
+
+# Actual
+sum((birth2 - birth1) == 1)
+# 39
+
+So our model is underestimating male births after female births.
