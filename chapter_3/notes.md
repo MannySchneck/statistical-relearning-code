@@ -179,3 +179,11 @@ w <- rbinom(1e4, size=9, prob=samples)
 parameter value to make a binomial prediction. Effectively averaging over the
 distribution because of the sampling process. Note that the number of samples
 has to be.... how big? Has to dominate something but not sure what.
+
+Model checking:
+* The binomial model assumes no correlation between subsequent tosses.
+
+To check: look at "flips" in sequence in the data vs what we sample.
+
+Look at "longest run".
+
